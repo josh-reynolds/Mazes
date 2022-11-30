@@ -54,6 +54,19 @@ class PolarGrid < Grid
     @grid[row][col]
   end
 
+  def background_color_for(cell)
+    distance = @distances[cell] or return nil
+    intensity = (@maximum - distance).to_f / @maximum
+    dark = (255 * intensity).round
+    bright = 128 + (127 * intensity).round
+    ChunkyPNG::Color.rgb(dark, bright, dark)
+  end
+
+  def distances=(distances)
+    @distances = distances
+    farthest, @maximum = distances.max
+  end
+
   def to_png(cell_size: 10)
     img_size = 2 * @rows * cell_size
 
@@ -63,28 +76,37 @@ class PolarGrid < Grid
     img = ChunkyPNG::Image.new(img_size + 1, img_size + 1, background)
     center = img_size / 2
 
-    each_cell do |cell|
-      next if cell.row == 0
+    [:backgrounds, :walls].each do |mode|
+      each_cell do |cell|
+        next if cell.row == 0
 
-      theta        = 2 * Math::PI / @grid[cell.row].length
-      inner_radius = cell.row * cell_size
-      outer_radius = (cell.row + 1) * cell_size
-      theta_ccw    = cell.column * theta
-      theta_cw     = (cell.column + 1) * theta
+        theta        = 2 * Math::PI / @grid[cell.row].length
+        inner_radius = cell.row * cell_size
+        outer_radius = (cell.row + 1) * cell_size
+        theta_ccw    = cell.column * theta
+        theta_cw     = (cell.column + 1) * theta
 
-      ax = center + (inner_radius * Math.cos(theta_ccw)).to_i
-      ay = center + (inner_radius * Math.sin(theta_ccw)).to_i
-      bx = center + (outer_radius * Math.cos(theta_ccw)).to_i
-      by = center + (outer_radius * Math.sin(theta_ccw)).to_i
-      cx = center + (inner_radius * Math.cos(theta_cw)).to_i
-      cy = center + (inner_radius * Math.sin(theta_cw)).to_i
-      dx = center + (outer_radius * Math.cos(theta_cw)).to_i
-      dy = center + (outer_radius * Math.sin(theta_cw)).to_i
+        ax = center + (inner_radius * Math.cos(theta_ccw)).to_i
+        ay = center + (inner_radius * Math.sin(theta_ccw)).to_i
+        bx = center + (outer_radius * Math.cos(theta_ccw)).to_i
+        by = center + (outer_radius * Math.sin(theta_ccw)).to_i
+        cx = center + (inner_radius * Math.cos(theta_cw)).to_i
+        cy = center + (inner_radius * Math.sin(theta_cw)).to_i
+        dx = center + (outer_radius * Math.cos(theta_cw)).to_i
+        dy = center + (outer_radius * Math.sin(theta_cw)).to_i
 
-      img.line(ax, ay, cx, cy, wall) unless cell.linked?(cell.inward)
-      img.line(cx, cy, dx, dy, wall) unless cell.linked?(cell.cw)
+        if mode == :backgrounds
+          color = background_color_for(cell)
+          if color
+            points = [[ax, ay],[cx, cy],[dx, dy],[bx, by]]
+            img.polygon(points, color, color)
+          end
+        else
+          img.line(ax, ay, cx, cy, wall) unless cell.linked?(cell.inward)
+          img.line(cx, cy, dx, dy, wall) unless cell.linked?(cell.cw)
+        end
+      end
     end
-
     img.circle(center, center, @rows * cell_size, wall)
     img   
   end

@@ -123,7 +123,7 @@ class Grid
     img
   end
 
-  def cell_coordinates_with_insets(x, y, cell_size, inset)
+  def cell_coordinates_with_inset(x, y, cell_size, inset)
     x1, x4 = x, x + cell_size
     x2 = x1 + inset
     x3 = x4 - inset
@@ -137,7 +137,7 @@ class Grid
   end
 
   def to_png_with_inset(img, cell, mode, cell_size, wall, x, y, inset)
-    x1, x2, x3, x4, y1, y2, y3, y4 = cell_coordinates_with_insets(x, y, cell_size, inset)
+    x1, x2, x3, x4, y1, y2, y3, y4 = cell_coordinates_with_inset(x, y, cell_size, inset)
 
     if mode == :backgrounds
       # not implemented yet

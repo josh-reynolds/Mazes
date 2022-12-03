@@ -33,6 +33,9 @@ end
 
 Kruskals.on(grid, state)
 
+middle = grid[grid.rows / 2, grid.columns / 2]
+grid.distances = middle.distances
+
 filename = "kruskals_weave.png"
 grid.to_png(inset:0.2).save(filename)
 puts "saved to #{filename}"

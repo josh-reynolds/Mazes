@@ -67,7 +67,17 @@ class Grid
   end
 
   def background_color_for(cell)
-    ChunkyPNG::Color.rgb(255, 50, 50)
+    #ChunkyPNG::Color.rgb(255, 50, 50)
+    distance = @distances[cell] or return nil
+    intensity = (@maximum - distance).to_f / @maximum
+    dark = (255 * intensity).round
+    bright = 128 + (127 * intensity).round
+    ChunkyPNG::Color.rgb(dark, bright, dark)  
+  end
+
+  def distances=(distances)
+    @distances = distances
+    farthest, @maximum = distances.max
   end
 
   def to_s

@@ -39,16 +39,29 @@ class WeaveGrid < Grid
             x1, x2, x3, x4, y1, y2, y3, y4 = 
                 cell_coordinates_with_inset(x, y, cell_size, inset)
             
-            if cell.vertical_passage?
-                img.line(x2, y1, x2, y2, wall)
-                img.line(x3, y1, x3, y2, wall)
-                img.line(x2, y3, x2, y4, wall)
-                img.line(x3, y3, x3, y4, wall)
+            if mode == :backgrounds
+                color = background_color_for(cell)
+                if color
+                    if cell.vertical_passage?
+                        img.rect(x2, y1, x3, y2, color, color)
+                        img.rect(x2, y3, x3, y4, color, color)
+                    else
+                        img.rect(x1, y2, x2, y3, color, color)
+                        img.rect(x3, y2, x4, y3, color, color)
+                    end
+                end
             else
-                img.line(x1, y2, x2, y2, wall)
-                img.line(x1, y3, x2, y3, wall)
-                img.line(x3, y2, x4, y2, wall)
-                img.line(x3, y3, x4, y3, wall)
+                if cell.vertical_passage?
+                    img.line(x2, y1, x2, y2, wall)
+                    img.line(x3, y1, x3, y2, wall)
+                    img.line(x2, y3, x2, y4, wall)
+                    img.line(x3, y3, x3, y4, wall)
+                else
+                    img.line(x1, y2, x2, y2, wall)
+                    img.line(x1, y3, x2, y3, wall)
+                    img.line(x3, y2, x4, y2, wall)
+                    img.line(x3, y3, x4, y3, wall)
+                end
             end
         end
     end
